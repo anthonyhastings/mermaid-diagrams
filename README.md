@@ -160,19 +160,23 @@ sequenceDiagram
   Note over C,S: Payment Intent is created and emailed to the customer
   OS -->> PS: Order emitted to Kakfa<br>Picked up by Payment Service
   PS ->> S: Background Job<br>POST /v1/payment_intents<br>Resulting ID stored
-  PS ->> C: Email with payment link send to customer
+  PS ->> C: Email with payment link sent to customer
 
   %% User pays for order
   Note over C,S: Customer provides payment details for the payment intent
-  C ->> PC: Clicks link in email and arrives at Payments Client
-  PC ->> S: Payment details given and payment taken
+  C ->> PC: Clicks link in email
+  PC ->> S: Payment details given along with idempotent identifier
+  alt Initial request
+    S ->> PC: payment processed and record stored
+  else Retried request
+    S ->> PC: previous stored record returned
+  end
   S -->> PS: Webhook triggered<br>Payment acknowledged
 
   %% Order updated and confirmation given
   Note over C,PS: Downstream services notified of the payment
   PS -->> OS: Successful payment emitted to Kafka<br>Picked up by Order Service<br>Order marked as paid
-  OS ->> C: Confirmation sent to customer
-
+  OS ->> C: Confirmation email sent to customer
 ```
 
 ```mermaid
@@ -196,18 +200,23 @@ sequenceDiagram
   Note over C,S: Payment Intent is created and emailed to the customer
   OS -->> PS: Order emitted to Kakfa<br>Picked up by Payment Service
   PS ->> S: Background Job<br>POST /v1/payment_intents<br>Resulting ID stored
-  PS ->> C: Email with payment link send to customer
+  PS ->> C: Email with payment link sent to customer
 
   %% User pays for order
   Note over C,S: Customer provides payment details for the payment intent
-  C ->> PC: Clicks link in email and arrives at Payments Client
-  PC ->> S: Payment details given and payment taken
+  C ->> PC: Clicks link in email
+  PC ->> S: Payment details given along with idempotent identifier
+  alt Initial request
+    S ->> PC: payment processed and record stored
+  else Retried request
+    S ->> PC: previous stored record returned
+  end
   S -->> PS: Webhook triggered<br>Payment acknowledged
 
   %% Order updated and confirmation given
   Note over C,PS: Downstream services notified of the payment
   PS -->> OS: Successful payment emitted to Kafka<br>Picked up by Order Service<br>Order marked as paid
-  OS ->> C: Confirmation sent to customer
+  OS ->> C: Confirmation email sent to customer
 ```
 
 ### Entity Relationship Diagrams
